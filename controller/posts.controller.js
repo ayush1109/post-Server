@@ -1,7 +1,9 @@
-const WishList = require('../models/wishList');
+const Post = require('../models/posts');
 
 exports.fetchAll = async (req, res, next) => {
-    WishList.find({})
+    console.log(req.user._id)
+    Post.find({author: req.user._id})
+        .populate('author')
         .then((data) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -11,7 +13,9 @@ exports.fetchAll = async (req, res, next) => {
 }
 
 exports.deleteAll = async (req, res, next) => {
-    WishList.remove({})
+    Post.remove({})
+    .populate('author')
+
         .then((data) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -21,7 +25,13 @@ exports.deleteAll = async (req, res, next) => {
 }
 
 exports.write = async (req, res, next) => {
-    WishList.create(req.body)
+        const post = new Post({
+            title: req.body.title,
+            description: req.body.description,
+            author: req.user._id
+        });
+
+        post.save()
         .then((data) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -31,7 +41,9 @@ exports.write = async (req, res, next) => {
 }
 
 exports.deleteOne = async (req, res, next) => {
-    WishList.findByIdAndRemove(req.params.wishListId)
+    Post.findByIdAndRemove(req.params.postId)
+    .populate('author')
+
         .then((data) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -41,7 +53,8 @@ exports.deleteOne = async (req, res, next) => {
 }
 
 exports.fetchOne = async (req, res, next) => {
-    WishList.findById(req.params.wishListId)
+    Post.findById(req.params.postId)
+        .populate('author')
         .then((data) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -51,9 +64,11 @@ exports.fetchOne = async (req, res, next) => {
 }
 
 exports.update = async (req, res, next) => {
-    WishList.findByIdAndUpdate(req.params.wishListId, {
+    Post.findByIdAndUpdate(req.params.postId, {
         $set: req.body
     }, { new: true })
+    .populate('author')
+
         .then((resp) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
